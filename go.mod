@@ -1,3 +1,3 @@
-module github.com/SimpleBlockChain
+module github.com/ritvikdayal/SimpleBlockchain
 
 go 1.17

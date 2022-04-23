@@ -1,40 +1,25 @@
 {
  "blocks": [
   {
-   "timestamp": "2022-04-22T07:37:48.8992203+05:30",
-   "data": "Genesis Block",
+   "timestamp": "2022-04-23T10:04:54.2568032+05:30",
+   "data": "R2VuZXNpcyBCbG9jaw==",
    "prev_hash": "",
-   "hash": "9WPIQyGWSQ/9ZqWE5yg7oAcRtd+0i3M8uC3jU0kBPrM="
+   "hash": "AAAJJWk9WsBTOKesbdcWw9RXEvoA5EQjYAyU7YJr8M4=",
+   "nonce": 1206545
   },
   {
-   "timestamp": "2022-04-22T07:37:52.3859132+05:30",
-   "data": "123456789",
-   "prev_hash": "9WPIQyGWSQ/9ZqWE5yg7oAcRtd+0i3M8uC3jU0kBPrM=",
-   "hash": "RyH07/9xkqvWOP0NJvAxCE8nEIuf2oOtWzOY1F0btyw="
+   "timestamp": "2022-04-23T10:05:46.0829546+05:30",
+   "data": "SGVsbG8gd29ybGQ=",
+   "prev_hash": "AAAJJWk9WsBTOKesbdcWw9RXEvoA5EQjYAyU7YJr8M4=",
+   "hash": "AAAAanmcshT6wsZ+nsqt5ghXDCYf6rLBXpMQNqGpwt8=",
+   "nonce": 1303790
   },
   {
-   "timestamp": "2022-04-22T07:37:57.930886+05:30",
-   "data": "987654321",
-   "prev_hash": "RyH07/9xkqvWOP0NJvAxCE8nEIuf2oOtWzOY1F0btyw=",
-   "hash": "Qlf93v9bxenUg4W/NkRnMwAYz1j0E1ogl5JJcHuAkQg="
-  },
-  {
-   "timestamp": "2022-04-22T07:38:11.1061154+05:30",
-   "data": "Solo ride until I die",
-   "prev_hash": "Qlf93v9bxenUg4W/NkRnMwAYz1j0E1ogl5JJcHuAkQg=",
-   "hash": "QLj9QgRT2tY/M4EmkLOcFms9ZubtUeFApWYcyoTXjKo="
-  },
-  {
-   "timestamp": "2022-04-22T07:38:20.7947854+05:30",
-   "data": "Fire in my soul",
-   "prev_hash": "QLj9QgRT2tY/M4EmkLOcFms9ZubtUeFApWYcyoTXjKo=",
-   "hash": "DdjpXBliJZUgeYICVK/w8jQVTp8LNsn/FnLumV/a+ls="
-  },
-  {
-   "timestamp": "2022-04-22T07:38:32.6499649+05:30",
-   "data": "I just need privacy",
-   "prev_hash": "DdjpXBliJZUgeYICVK/w8jQVTp8LNsn/FnLumV/a+ls=",
-   "hash": "5EaHwUBUj7ujTVCg8bFIHc/N3TdlcW/Gf24jGknZt3A="
+   "timestamp": "2022-04-23T10:06:58.9704615+05:30",
+   "data": "QWoga3VjaCB0b29mYW5pIGthcnRlIGhhaQ==",
+   "prev_hash": "AAAAanmcshT6wsZ+nsqt5ghXDCYf6rLBXpMQNqGpwt8=",
+   "hash": "AAALOTHi1zXqkAdba6aj68owjxQxEr7hTCI1M62oszc=",
+   "nonce": 372334
   }
  ]
 }
