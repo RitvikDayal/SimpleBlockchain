@@ -5,59 +5,101 @@ Simple block chain.
 */
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"strconv"
 
 	// Import local block chain package.
 	"github.com/ritvikdayal/SimpleBlockchain/blockchain"
 )
 
-func main() {
-	/*
-		Infinite loop to ask user for input.
-	*/
-	bc := blockchain.InitBlockChain()
-	scanner := bufio.NewScanner(os.Stdin)
+type CommandLine struct {
+	blockchain *blockchain.Blockchain
+}
+
+func (cli *CommandLine) PrintUsage() {
+	fmt.Println("Usage:")
+	fmt.Println(" add -data DATA -- will add a new block to the chain with the data provided.")
+	fmt.Println(" print -- will print all the blocks in the chain.")
+}
+
+func (cli *CommandLine) ValidateArgs() {
+	if len(os.Args) < 2 {
+		cli.PrintUsage()
+		runtime.Goexit()
+	}
+}
+
+func (cli *CommandLine) addBlock(data string) {
+	cli.blockchain.AddBlock(data)
+	fmt.Println("Block added to the blockchain.")
+}
+
+func (cli *CommandLine) printChain() {
+	iter := cli.blockchain.Iterator()
 	for {
-		// Ask user for Data to store in the block.
-		fmt.Printf("Enter data to store in the block: ")
-		var data string
-		scanner.Scan()
-		data = scanner.Text()
-
-		// Add the block to the blockchain.
-		bc.AddBlock(data)
-
-		// Print number of Blocks in the blockchain.
-		fmt.Println("Number of Blocks in the blockchain: ", len(bc.Blocks))
-
-		// Ask if user what to print the blockchain.
-		fmt.Printf("Do you want to print the blockchain? (y/n)")
-		var print string
-		scanner.Scan()
-		print = scanner.Text()
-
-		if print == "y" {
-			for _, block := range bc.Blocks {
-				blockchain.PrintBlock(block)
-
-				pow := blockchain.NewProofOfWork(block)
-				fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
-			}
+		block := iter.Next()
+		if block == nil {
+			break
 		}
+		fmt.Printf("\n----------------------------\n")
+		fmt.Printf("Data: %s\n", block.Data)
+		fmt.Printf("Prev. hash: %x\n", block.PrevHash)
+		fmt.Printf("Hash: %x\n", block.Hash)
 
-		// Ask if user wants to exit.
-		fmt.Printf("Do you want to exit? (y/n)")
-		var exit string
-		fmt.Scanln(&exit)
-		if exit == "y" {
-			// save the blockchain to a file.
-			fmt.Println("Saving blockchain to a file...")
-			blockchain.SaveBlockchain(bc)
-			fmt.Println("Blockchain saved to a file.")
+		pow := blockchain.NewProofOfWork(block)
+		fmt.Printf("\nPoW: %s\n", strconv.FormatBool(pow.Validate()))
+
+		fmt.Printf("----------------------------\n")
+
+		if len(block.PrevHash) == 0 {
 			break
 		}
 	}
+}
+
+func (cli *CommandLine) Run() {
+	cli.ValidateArgs()
+
+	addBlockCmd := flag.NewFlagSet("add", flag.ExitOnError)
+	printChainCmd := flag.NewFlagSet("print", flag.ExitOnError)
+
+	addBlockData := addBlockCmd.String("data", "", "Block data")
+
+	switch os.Args[1] {
+	case "add":
+		err := addBlockCmd.Parse(os.Args[2:])
+		blockchain.HandleError(err)
+	case "print":
+		err := printChainCmd.Parse(os.Args[2:])
+		blockchain.HandleError(err)
+	default:
+		cli.PrintUsage()
+		runtime.Goexit()
+	}
+
+	if addBlockCmd.Parsed() {
+		if *addBlockData == "" {
+			addBlockCmd.Usage()
+			runtime.Goexit()
+		} else {
+			cli.addBlock(*addBlockData)
+		}
+	}
+
+	if printChainCmd.Parsed() {
+		cli.printChain()
+	}
+
+}
+
+func main() {
+	chain := blockchain.InitBlockChain()
+	defer chain.Database.Close()
+
+	cli := CommandLine{chain}
+	cli.Run()
+
 }

@@ -40,9 +40,7 @@ func NewProofOfWork(block *Block) *ProofOfWork {
 func IntToHex(n int64) []byte {
 	buffer := new(bytes.Buffer)
 	err := binary.Write(buffer, binary.BigEndian, n)
-	if err != nil {
-		panic(err)
-	}
+	HandleError(err)
 
 	return buffer.Bytes()
 }

@@ -5,34 +5,90 @@ A Simple block chain implementation in Go.
 */
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
+
+	"github.com/dgraph-io/badger"
 )
 
+const dbFile = "./tmp/blocks"
+
 type Blockchain struct {
-	Blocks []*Block `json:"blocks"`
+	// Blocks []*Block `json:"blocks"`
+	LastHash []byte `json:"lastHash"`
+	Database *badger.DB
+}
+
+type BlockChainIterator struct {
+	CurrentHash []byte
+	Database    *badger.DB
 }
 
 func (bc *Blockchain) AddBlock(data string) {
-	prevBlock := bc.Blocks[len(bc.Blocks)-1]
-	newBlock := NewBlock(data, prevBlock.Hash)
-	bc.Blocks = append(bc.Blocks, newBlock)
+	var lastHash []byte
+
+	err := bc.Database.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte("lh"))
+		HandleError(err)
+		err = item.Value(func(val []byte) error {
+			lastHash = val
+			return nil
+		})
+		return err
+	})
+	HandleError(err)
+
+	newBlock := NewBlock(data, lastHash)
+	err = bc.Database.Update(func(txn *badger.Txn) error {
+
+		err := txn.Set(newBlock.Hash, newBlock.Serialize())
+		HandleError(err)
+
+		err = txn.Set([]byte("lh"), newBlock.Hash)
+		bc.LastHash = newBlock.Hash
+
+		return err
+	})
+	HandleError(err)
 }
 
 func InitBlockChain() *Blockchain {
-	return &Blockchain{[]*Block{NewGenesisBlock()}}
+	var lastHash []byte
+
+	opts := badger.DefaultOptions(dbFile)
+
+	db, err := badger.Open(opts)
+	HandleError(err)
+
+	err = db.Update(func(txn *badger.Txn) error {
+		if _, err := txn.Get([]byte("lh")); err == badger.ErrKeyNotFound {
+			fmt.Println("No existing blockchain found")
+			genesis := NewGenesisBlock()
+			fmt.Println("Genesis proved")
+			err = txn.Set(genesis.Hash, genesis.Serialize())
+			HandleError(err)
+			err = txn.Set([]byte("lh"), genesis.Hash)
+
+			lastHash = genesis.Hash
+
+			return err
+		} else {
+			item, err := txn.Get([]byte("lh"))
+			HandleError(err)
+			err = item.Value(func(val []byte) error {
+				lastHash = val
+				return nil
+			})
+			return err
+		}
+	})
+
+	HandleError(err)
+
+	blockchain := Blockchain{lastHash, db}
+	return &blockchain
 }
 
-func SaveBlockchain(bc *Blockchain) {
-	data, err := json.MarshalIndent(bc, "", " ")
-	if err != nil {
-		fmt.Println("Error: ", err)
-		return
-	}
-	err = ioutil.WriteFile("blockchain.json", data, 0644)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		return
-	}
+
+func (bc *Blockchain) Iterator() *BlockChainIterator {
+	return &BlockChainIterator{bc.LastHash, bc.Database}
 }

@@ -1,6 +1,8 @@
 package blockchain
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"time"
 )
@@ -35,4 +37,23 @@ func PrintBlock(block *Block) {
 	fmt.Println("Data: ", block.Data)
 	fmt.Println("Hash: ", block.Hash)
 	fmt.Println()
+}
+
+func (block *Block)Serialize() []byte {
+	var result bytes.Buffer
+	encoder := gob.NewEncoder(&result)
+
+	err := encoder.Encode(block)
+	HandleError(err)
+
+	return result.Bytes()
+}
+
+func Deserialize(data []byte) *Block {
+	var block Block
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+	err := decoder.Decode(&block)
+	HandleError(err)
+
+	return &block
 }
