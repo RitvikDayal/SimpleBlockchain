@@ -1,7 +1,9 @@
 package blockchain
 
 import (
+	"encoding/hex"
 	"log"
+	"os"
 
 	"github.com/dgraph-io/badger"
 )
@@ -12,6 +14,13 @@ func HandleError(err error) {
 	if err != nil {
 		log.Panic(err)
 	}
+}
+
+func DBexists() bool {
+	if _, err := os.Stat(dbFile); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 func (bci *BlockChainIterator) Next() *Block {
@@ -42,4 +51,44 @@ func (bc *Blockchain) Print() {
 		}
 		PrintBlock(block)
 	}
+}
+
+func (bc *Blockchain) UnspentTransactions(address string) []Transaction {
+	var UTXOs []Transaction
+	iter := bc.Iterator()
+	STXOs := make(map[string][]int)
+
+	for {
+		block := iter.Next()
+
+		for _, tx := range block.Transactions {
+			txID := hex.EncodeToString(tx.ID)
+
+		Outputs:
+			for outIdx, out := range tx.Outputs {
+				if STXOs[txID] != nil {
+					for _, out := range STXOs[txID] {
+						if out == outIdx {
+							continue Outputs
+						}
+					}
+				}
+				if out.CanBeUnlockedWith(address) {
+					UTXOs = append(UTXOs, *tx)
+				}
+			}
+			if !tx.IsCoinbase() {
+				for _, in := range tx.Inputs {
+					if in.CanUnlockIn(address) {
+						inTxId := hex.EncodeToString(in.Txid)
+						STXOs[inTxId] = append(STXOs[inTxId], in.Vout)
+					}
+				}
+			}
+		}
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
+	return UTXOs
 }
