@@ -14,17 +14,6 @@ type Transaction struct {
 	Outputs []TXOutput
 }
 
-type TXInput struct {
-	Txid      []byte
-	Vout      int
-	Signature string
-}
-
-type TXOutput struct {
-	Value      int
-	PubKeyHash string
-}
-
 func (tx *Transaction) SetID() {
 	var encoded bytes.Buffer
 	var hash [32]byte
@@ -53,14 +42,6 @@ func CoinbaseTx(to, data string) *Transaction {
 
 func (tx *Transaction) IsCoinbase() bool {
 	return len(tx.Inputs) == 1 && len(tx.Inputs[0].Txid) == 0 && tx.Inputs[0].Vout == -1
-}
-
-func (in *TXInput) CanUnlockIn(data string) bool {
-	return in.Signature == data
-}
-
-func (out *TXOutput) CanBeUnlockedWith(data string) bool {
-	return out.PubKeyHash == data
 }
 
 func (bc *Blockchain) FindUTXO(address string) []TXOutput {
